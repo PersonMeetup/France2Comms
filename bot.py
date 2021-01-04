@@ -35,9 +35,23 @@ async def on_ready():
 
 
 
-@slash.slash(name='mark',description='Designates the current channel for posting to Twitter',guild_ids=guild_ids)
-async def _mark(ctx):
-    await ctx.send(content='Placeholder')
+@slash.slash(
+    name='mark',
+    description='Designates the current channel for posting to Twitter',
+    guild_ids=guild_ids,
+    options=[{
+        'name':'channel',
+        'description': 'ID of desired channel',
+        'type': 7,
+    }])
+async def _mark(ctx: SlashContext, channel = None):
+    print(channel.id)
+    if channel:
+        configRequest('Server','channel',str(channel.id))
+        await ctx.send(content=f"Set {channel.mention} to have it's messages sent to Twitter.",complete_hidden=True)
+    else:
+        configRequest('Server','channel',str(ctx.channel.id))
+        await ctx.send(content="Set the current channel to have it's messages sent to Twitter.",complete_hidden=True)
 
 @slash.slash(
     name='toggle',
@@ -53,12 +67,12 @@ async def _toggle(ctx: SlashContext, value: bool):
     configRequest('Server','toggle',str(value))
     await ctx.send(content=f'Message forwarding set to `{value}`!',complete_hidden=True)
 
-@slash.slash(name='optin',description='Opt into the bot\'s Twitter functionality',guild_ids=guild_ids)
+@slash.slash(name='optin',description="Opt into the bot's Twitter functionality",guild_ids=guild_ids)
 async def _optin(ctx):
     configRequest(str(ctx.author),'opt','True')
     await ctx.send(content='You have opted into having your messages tweeted out!',complete_hidden=True)
 
-@slash.slash(name='optout',description='Opt out of the bot\'s Twitter functionality',guild_ids=guild_ids)
+@slash.slash(name='optout',description="Opt out of the bot's Twitter functionality",guild_ids=guild_ids)
 async def _optout(ctx):
     configRequest(str(ctx.author),'opt','False')
     await ctx.send(content='You have opted out of having your messages tweeted out.',complete_hidden=True)
