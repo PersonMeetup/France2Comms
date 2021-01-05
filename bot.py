@@ -12,6 +12,7 @@ bot = commands.Bot(command_prefix='/',intents=intents)
 slash = SlashCommand(client=bot,auto_register=True,auto_delete=True)
 
 guild_ids = [673014590862393385]
+dev_ids = [149608924394422272,439344743093239810,181130456706580480]
 config = ConfigParser()
 
 def configRequest(cat,set,val):
@@ -30,11 +31,25 @@ def configRequest(cat,set,val):
     with open('config.ini','w') as update:
         config.write(update)
 
+
+
+# Credit to ╳(͜͡𝓪𝓷𝓖 ⑆#5512 from the discord.py slash command server for this function.
+def qualified(f): 
+    async def wrap(ctx, *args, **kwargs):
+        author_id = ctx.author.id if isinstance(ctx.author, discord.Member) else ctx.author
+
+        if author_id in dev_ids:
+            return await f(ctx, *args, **kwargs)
+
+        else:
+            await ctx.send(content = f"Only The Queen(s) or Person can call this command.", complete_hidden = True)
+    return wrap
+
+
+
 @bot.event
 async def on_ready():
     print('Internal Report Check: Logged in as {0.user}'.format(bot))
-
-
 
 @bot.event
 async def on_message(message):
@@ -42,17 +57,17 @@ async def on_message(message):
     # Check two things: 1) "Should I be checking messages right now?"
     #                   2) "Is this in the right channel?"
     if (config.getboolean('Server','toggle') == False) or (message.channel.id != config.getint('Server','channel')):
-        print('Message was posted in the wrong channel, or Twitter functionality is off')
+#        print('Message was posted in the wrong channel, or Twitter functionality is off')
         return
 
     # Now that the message is confirmed to be in the right channel,
     # let's check to see if the user is opted in.
     if str(message.author.id) in config:
         opt = config.getboolean(str(message.author.id),'opt')
-        print('User settings detected')
+#        print('User settings detected')
     else:
         opt = config.getboolean('User-Default','opt')
-        print('No user settings detected, using default')
+#        print('No user settings detected, using default')
     
     if opt == False:
         return
@@ -70,6 +85,7 @@ async def on_message(message):
         'description': 'ID of desired channel',
         'type': 7,
     }])
+@qualified
 async def _mark(ctx: SlashContext, channel = None):
     if channel:
         configRequest('Server','channel',str(channel.id))
@@ -88,6 +104,7 @@ async def _mark(ctx: SlashContext, channel = None):
         'type': 5,
         'required': 'True'
     }])
+@qualified
 async def _toggle(ctx: SlashContext, value: bool):
     configRequest('Server','toggle',str(value))
     await ctx.send(content=f'Message forwarding set to `{value}`!',complete_hidden=True)
