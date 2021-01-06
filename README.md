@@ -14,7 +14,9 @@ Past that, the bot will check if the user has opted into having their messages s
 
 ## Commands:
 `/mark [optional: channel]` Designates either the current or a selected channel for posting to Twitter [Admin/Dev only]
+
 `/toggle [bool]` Sets message forwarding to Twitter on or off [Admin/Dev only]
+
 `/optin` & `/optout` Signal participation in the bot's Twitter functionality
 
 ## Risks and Liabilities
