@@ -3,11 +3,10 @@ from discord.ext import commands
 from discord_slash import SlashCommand, SlashContext
 from configparser import ConfigParser
 import os
-import random
+from twitter import relay
 
 intents = discord.Intents.default()
 intents.messages = True
-#intents.members = True
 bot = commands.Bot(command_prefix='/',intents=intents)
 slash = SlashCommand(client=bot,auto_register=True,auto_delete=True)
 
@@ -30,8 +29,6 @@ def configRequest(cat,set,val):
     config.set(cat,set,val)
     with open('config.ini','w') as update:
         config.write(update)
-
-
 
 # Credit to ╳(͜͡𝓪𝓷𝓖 ⑆#5512 from the discord.py slash command server for this function.
 def qualified(f): 
@@ -72,13 +69,19 @@ async def on_message(message):
     if opt == False:
         return
     else:
-        print(message.content)
+        for attempt in range(5):
+            responcecode = relay.distweet(message)
+            if responcecode == 200:
+                print('Tweet Successful!')
+                break
+            print('Tweet Failure! Reattempting...')
+
 
 
 
 @slash.slash(
     name='mark',
-    description='Designates the current channel for posting to Twitter',
+    description='Designates either the current or a selected channel for posting to Twitter',
     guild_ids=guild_ids,
     options=[{
         'name':'channel',
@@ -121,4 +124,4 @@ async def _optout(ctx):
 
 
 
-bot.run(os.getenv('TOKEN'))
+bot.run(os.getenv('DISCORD_TOKEN'))
