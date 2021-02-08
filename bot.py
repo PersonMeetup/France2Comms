@@ -1,9 +1,12 @@
+#!/usr/bin/env python
 import discord
 from discord.ext import commands
 from discord_slash import SlashCommand, SlashContext
 from configparser import ConfigParser
 import os
 from twitter import relay
+from dotenv import load_dotenv
+load_dotenv()
 
 intents = discord.Intents.default()
 intents.messages = True
@@ -31,7 +34,7 @@ def configRequest(cat,set,val):
         config.write(update)
 
 # Credit to ╳(͜͡𝓪𝓷𝓖 ⑆#5512 from the discord.py slash command server for this function.
-def qualified(f): 
+def qualified(f):
     async def wrap(ctx, *args, **kwargs):
         author_id = ctx.author.id if isinstance(ctx.author, discord.Member) else ctx.author
 
@@ -54,21 +57,22 @@ async def on_message(message):
     # Check two things: 1) "Should I be checking messages right now?"
     #                   2) "Is this in the right channel?"
     if (config.getboolean('Server','toggle') == False) or (message.channel.id != config.getint('Server','channel')):
-#        print('Message was posted in the wrong channel, or Twitter functionality is off')
+        #print('Message was posted in the wrong channel, or Twitter functionality is off')
         return
 
     # Now that the message is confirmed to be in the right channel,
     # let's check to see if the user is opted in.
     if str(message.author.id) in config:
         opt = config.getboolean(str(message.author.id),'opt')
-#        print('User settings detected')
+        #print('User settings detected')
     else:
         opt = config.getboolean('User-Default','opt')
-#        print('No user settings detected, using default')
-    
+        #print('No user settings detected, using default')
+
     if opt == False:
         return
     else:
+        print('Message passed, attempting to send to Twitter')
         for attempt in range(5):
             responcecode = relay.distweet(message)
             if responcecode == 200:
