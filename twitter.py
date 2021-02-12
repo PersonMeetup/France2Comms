@@ -27,14 +27,14 @@ class relay:
             #print('UPLOAD MEDIA SUCCESS' if r.status_code == 200 else 'UPLOAD MEDIA FAILURE: ' + r.text)
 
             if r.status_code == 200:
-		logging.info('Media upload success, Tweeting string...')
                 media_id = r.json()['media_id']
+                logging.info('Media upload success, Tweeting string...')
                 tweet = api.request('statuses/update', {'status':status[:280], 'media_ids':media_id})
                 return tweet.status_code
-	else:
-		logging.info('No attachment detected, Tweeting string...')
-       	tweet = api.request('statuses/update', {'status':status[:280]})
-       	return tweet.status_code
+        
+        else:
+            tweet = api.request('statuses/update', {'status':status[:280]})
+            return tweet.status_code
 
     def apitest():
         r = api.request('statuses/home_timeline', {'count':5})
