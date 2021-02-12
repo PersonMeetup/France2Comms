@@ -5,7 +5,7 @@ from discord_slash import SlashCommand, SlashContext
 from configparser import ConfigParser
 import requests
 import os; import logging
-from twitter import relay
+import twitter
 from dotenv import load_dotenv
 load_dotenv()
 logging.basicConfig(format='[%(asctime)s:%(levelname)s] %(message)s', level=logging.INFO)
@@ -81,9 +81,9 @@ async def on_message(message):
             r = requests.get((message.attachments[0]).url)
             with open('image.png','wb') as f:
                 f.write(r.content)
-            responcecode = relay.mediaTweet(message)
+            responcecode = twitter.mediaTweet(message)
         else:
-            responcecode = relay.tweet(message)
+            responcecode = twitter.tweet(message)
 
         try:
             responcecode == 200
