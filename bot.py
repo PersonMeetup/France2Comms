@@ -3,10 +3,11 @@ import discord
 from discord.ext import commands
 from discord_slash import SlashCommand, SlashContext
 from configparser import ConfigParser
+import requests
 import os; import logging
 from twitter import relay
 from dotenv import load_dotenv
-load_dotenv()      #V{filename='status.log',}
+load_dotenv()
 logging.basicConfig(format='[%(asctime)s:%(levelname)s] %(message)s', level=logging.INFO)
 
 intents = discord.Intents.default()
@@ -74,7 +75,16 @@ async def on_message(message):
         return
     else:
         logging.info(f'NEW MESSAGE: [{message.content}]')
-        responcecode = relay.distweet(message)
+        status = message.content[:280]
+        if message.attachments:
+            logging.info(f'Message contains attachment, downloading... [{(message.attachments[0]).url}]')
+            r = requests.get((message.attachments[0]).url)
+            with open('image.png','wb') as f:
+                f.write(r.content)
+            responcecode = relay.mediaTweet(message)
+        else:
+            responcecode = relay.tweet(message)
+
         try:
             responcecode == 200
             logging.info('Tweet Successful!')

@@ -12,28 +12,20 @@ api = TwitterAPI(os.getenv('TWITTER_CONKEY'),os.getenv('TWITTER_CONSECRET'),os.g
 class relay:
     """Twitter API handler."""
 
-    def distweet(message):
-        """Decompiles a `discord.Message` method and posts its content to Twitter"""
-        status = message.content
-        if message.attachments:
-            logging.info(f'Message contains attachment, extracting URL... [{(message.attachments[0]).url}]')
-            r = requests.get((message.attachments[0]).url)
-            with open('image.png','wb') as f:
-                f.write(r.content)
+    def tweet(message):
+        tweet = api.request('statuses/update', {'status':message})
+        return tweet.status_code
 
-            file = open('./image.png', 'rb')
-            data = file.read()
-            r = api.request('media/upload', None, {'media': data})
+    def mediaTweet(message):
+        file = open('./image.png', 'rb')
+        data = file.read()
+        r = api.request('media/upload', None, {'media': data})
             #print('UPLOAD MEDIA SUCCESS' if r.status_code == 200 else 'UPLOAD MEDIA FAILURE: ' + r.text)
 
-            if r.status_code == 200:
-                media_id = r.json()['media_id']
-                logging.info('Media upload success, Tweeting string...')
-                tweet = api.request('statuses/update', {'status':status[:280], 'media_ids':media_id})
-                return tweet.status_code
-        
-        else:
-            tweet = api.request('statuses/update', {'status':status[:280]})
+        if r.status_code == 200:
+            media_id = r.json()['media_id']
+            logging.info('Media upload success, Tweeting string...')
+            tweet = api.request('statuses/update', {'status':message, 'media_ids':media_id})
             return tweet.status_code
 
     def apitest():
